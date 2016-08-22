@@ -1,186 +1,104 @@
-# ApiTests
-**ApiTests**是一个快速验证接口正确性的框架，主要用于回归验证，亦可用于接口测试（需要拓展，目前还未支持，考虑后面加上）。
+AndroidTestScripts
+==================
+
+Android测试中常用到的脚本
+
+###主要脚本功能
+
+批量安装应用（支持以中文命名的 apk）、批量卸载、截屏、录制视频、获取当前应用的 apk 文件、包名、Activity 名等。<br>
 
 
+###2016.7.19
+增加部分python脚本对多设备的支持：
 
-#### 关于这个框架
+![device_id](image/device_id.png)
+###2016.04.22
+增加 `fps.py`,获取测试界面的 `fps`、`jankniess`。
 
-**设计初衷：**
+使用方法：按照提示输入参数，测试过程中操作界面，最终数据结果存放于 `fps_data` 目录下，csv 格式。
+如有错误，请指出！
 
-解决我们项目的接口测试痛点。从之前的1-2小时测试时间压缩到现在的1分钟以内，效率提升，效果显著
+####demo：
 
-**对于读者：**
+测试界面：
 
-- 完全符合你们项目
-  - 庆幸的是入手即用，方便快捷
-  - 需要注意的是，不要做伸手党，可以了解这个框架后，再去针对性的优化，让它更符合你们项目
-- 部分符合你们项目
-  - 提取出部分内容，加入到你们项目中
-- 完全不符合你们项目
-  - 提供一种思路，虽然可能没什么用，但是能了解到别人对这件事是怎么思考的
+![tuiku](image/tuiku.png)
 
-**关于框架代码结构：**
+cmd 界面：
 
-- 非程序出身，能写成这样我自己还是比较满意的
-- 结构设计可能有些问题，但是不影响使用
-  - 如发现设计不合理之处，欢迎指正
-  - 先出成果再作优化
+![fps_cmd](image/fps_cmd.png)
 
+最终结果：
 
-- 此框架服务于测试流程、效率，是一个工具
-- 至少目前认为手工+自动化才是最符合我们项目
-
-#### 功能
-
-具体查看框架思路
-
-- 接口只需录制一次，后续只需维护变动的接口
+![fps_chart](image/fps_chart.png)
 
 
-- 目前仅支持http的post请求方式，get以及https后续考虑加上，亦可自己完善
-- 快速的接口反馈，通常一分钟内完成，取决于机器/网络因素
-- 日常监控，后续加上
-- 可以屏蔽特殊接口
-- 创建的数据清理
-- 重试机制
+###2016.01.21
+增加 `logcat.py`，windows 中在 cmd 里面运行 logcat 命令，会给输出的日志内容根据优先级添加颜色。使用前提是已配置 adb 及 python 的环境变量，在 cmd 里面可以直接运行 adb 命令和python 脚本。
+用法：
+将`logcat.py` 配置到环境变量里面，使得可以在 cmd 中可以直接执行 logcat 命令。参数与 `adb logcat` 的一样。例如：
+```
+logcat -v time
+```
+无颜色时截图：
+![logcat1](image/logcat1.png)
+
+logcat 执行后：
+![logcat2](image/logcat2.png)
+
+当要使用重定向时，请使用 `adb logcat`.
 
 
-#### 接口流程走向
+###2015.06.02
+增加 `get_app_crash_log.py`  与 `getAppCrashLog.sh`, 应用发生 crash ，未及时从 logcat 获取到有效 log 时，可通过该脚本获取 log
+
+###2015.05.30
+增加 `get_app_permission.py`，获取设备当前应用的权限详情，windows 下会将结果写入 `permission.txt` 文件中，其他系统打印在控制台：
 
 ```
-接口回归测试启动...
-清理测试数据...
-读取配置文件中...
-读取接口数据中...
-接口请求中，请等待...
-http://a-b.test.c.com/api/Circle/AddCancelCollectCircle
-....................................................
-http://a-b.test.c.com/api/GroupActivity/UploadActivityImage
-http://a-b.test.c.com/api/photo/UploadImage
-RequestException url: http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-HTTPConnectionPool(host='http://a-b.test.c.com', port=80): Read timed out. (read timeout=30)
-IndexError url:
-http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-接口请求完成！
-发现diff接口，重试机制启动...
-第1次尝试请求diff...
-diff sessions: GetDemandKnockSourceListV4.txt
-diff sessions: GetSecondHouseTopic.txt
-http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-http://a-b.test.c.com/api/SecondHouseSource/GetSecondHouseTopic
-RequestException url: http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-HTTPConnectionPool(host='http://a-b.test.c.com', port=80): Read timed out. (read timeout=30)
-IndexError url:
-http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-发现diff存在，继续尝试请求...
-第2次尝试请求diff...
-diff sessions: GetDemandKnockSourceListV4.txt
-http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-RequestException url: http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-HTTPConnectionPool(host='http://a-b.test.c.com', port=80): Read timed out. (read timeout=30)
-IndexError url:
-http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-发现diff存在，继续尝试请求...
-第3次尝试请求diff...
-diff sessions: GetDemandKnockSourceListV4.txt
-http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-RequestException url: http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-HTTPConnectionPool(host='http://a-b.test.c.com', port=80): Read timed out. (read timeout=30)
-IndexError url:
-http://a-b.test.c.com/api/Demand/GetDemandKnockSourceListV4
-diff请求完成...
-正在整理创建的数据...
-清理创建的接口数据...
-http://a-b.test.c.com/api/Circle/DeleteContent
-http://a-b.test.c.com/api/Group/DeleteAnnouncement
-http://a-b.test.c.com/api/RentDemand/DeleteRentDemandById
-http://a-b.test.c.com/api/GroupFile/DeleteGroupFile
-http://a-b.test.c.com/api/GroupDynamic/DeleteGroupDynamic
-http://a-b.test.c.com/api/Demand/DeleteDemandById
-http://a-b.test.c.com/api/GroupActivity/DeleteGroupActivity
-接口数据清理完成！
-测试报告准备中...
-接口回归测试完成！
-耗时： 125s
+[xuxu:...1/AndroidTestScripts/python]$ python get_app_permission.py                                          (master✱) 
+package: com.android.camera
+
+android.permission.READ_PHONE_STATE:
+  允许应用程序访问设备的手机功能。有此权限的应用程序可确定此手机的号码和序列号，是否正在通话，以及对方的号码等。
+android.permission.CAMERA:
+  允许应用程序使用相机拍照，这样应用程序可随时收集进入相机镜头的图像。
+android.permission.WRITE_EXTERNAL_STORAGE:
+  允许应用程序写入SD卡。
+android.permission.ACCESS_FINE_LOCATION:
+  访问精准的位置源，例如手机上的全球定位系统(如果有)。恶意应用程序可能会借此确定您所处的位置，并可能消耗额外的电池电量。
+android.permission.ACCESS_WIFI_STATE:
+  允许应用程序查看有关 WLAN 状态的信息。
+android.permission.ACCESS_NETWORK_STATE:
+  允许应用程序查看所有网络的状态。
+android.permission.WAKE_LOCK:
+  允许应用程序防止手机进入休眠状态。
+android.permission.RECORD_AUDIO:
+  允许应用程序访问录音路径。
+android.permission.MODIFY_AUDIO_SETTINGS:
+  允许应用程序修改整个系统的音频设置，如音量和路由。
 ```
 
-#### 请求接口后写入本地的数据说明
+###2015.02.12
+因日常工作需要，增加备份设备中安装的第三方应用的脚本 `backup_app.py`。（区别于adb backup命令，只备份apk）<br>
 
-```
-FieldChange >> 字段改变的接口写入该文件
-ProgramCrash >> 程序异常接口写入该文件
-Unexpected >> 未达到预期字段校验的接口写入该文件
-VerifyRequest >> 需要再次确认的接口写入该文件
-GetUserInfoV2 >> 正常接口（一个接口一个文件）
-```
+###2015.01.31
+修改 `screenrecord.py` 中的默认录制时间，默认最长录制时间为 180 秒<br>
 
+###2015.01.29
+新增脚本 `get_cpu_mem_info.py`,获取设备当前运行的应用的 cpu、memory 信息，默认 top times 取值为20次，可自己修改脚本中的该参数
 
-
-#### 关于接口回放的数据
-
-- 第一次的数据来自fiddler录制
-- 第二次及以后的数据来自第一次请求写入本地的正常接口文件 + fiddler继续录制需要检查的接口
-- 一般来说不要一直拿第一次fiddler录制的数据使用，目的在于测试接口对各个客户端版本的兼容情况
-- 接口回放可以跑线上运行的客户端全部版本接口（一个版本一套接口）
-
-#### 框架的下一步
-
-- 优雅的Html报告
-- 邮件通知
-- 持续集成
-- 测试数据另存，方便后续查阅
-
-#### 框架的更下一步
-
-- 接口压测
-- 接口自动化（api测试）pass：目前只是回归验证
-- 简单的GUI界面
+脚本运行需要安装pychartdir模块，安装方法请参考 [http://blog.csdn.net/gb112211/article/details/43272049](http://blog.csdn.net/gb112211/article/details/43272049 "python pychartdir模块的安装及使用")<br>
+直接运行脚本，会生成线性图表存放于chart目录下，图表类似于：<br>
+![image](image/cpu_mem_info.png "chart" )
 
 
-#### 框架思路
+###2015.01.28
+修改了设备状态判断的代码（脚本自己都曾使用OK,如有问题，可以QQ联系：274925460）<br>
 
-![ApiTests 框架思路](./http api test.jpg)
+###2015.01.26
 
-
-
-#### 使用方式
-
-- 环境配置
-  - Python 3.x
-  - fiddler一枚（配置抓取手机请求）
-  - PyCharm 
-
-
-- 替换fiddler js
-
-  - 项目根目录的fiddler js整个文件内容替换fiddler的js
-    - 打开fiddler的Customize Rules功能
-    - 删除所有内容，并把fiddler js内容全部拷贝进去
-    - 修改拦截的host等信息
-    - [fiddler保存请求](https://testerhome.com/topics/5481)
-
-  fiddler js自定义信息
-
-  ```javascript
-
-  	//自定义参数设置
-  	public static var filterUrl = "a-webapi.test.b.com";
-  	public static var filePath = "D:\\Fiddler Sessions\\Api\\";
-  	public static var filePathForRequested = "D:\\Fiddler Sessions\\Requested.txt";
-  	public static var filePathForErrorResponse = "D:\\Fiddler Sessions\\ErrorResponse.txt";
-  	public static var filePathForVerifyRequset = "D:\\Fiddler Sessions\\VerifyRequset.txt";
-  	public static var filePathForRemoveSession = "D:\\Fiddler Sessions\\RemoveSession.txt";
-  	public static var filePathForAddSession = "D:\\Fiddler Sessions\\AddSession.txt";
-  ```
-
-  ​
-
-- token/session替换
-
-  - 替换成你们项目对应的token等
-  - 修改配置文件
-  - 修改response body json 判断逻辑
-
-
-- 运行方式
-  - 总入口在项目的launcher文件夹下面的RequestApi.py
+1.	改写 python 分类中的脚本结构，将大部分方法分装进了 scriptUtils 包中的 utils 模块中<br>
+2.	新增 `screenrecord.py`（录制视频,Android4.4新增功能）<br>
+3.	使用时请直接在脚本目录下运行脚本（可以将脚本目录复制到桌面上，使用时很方便）<br>
+4.	需要配置 `ANDROID_HOME`，如果脚本执行失败，请在命令行模式下运行脚本，查看报错信息<br>
